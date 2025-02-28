@@ -2,7 +2,9 @@ import os
 import time
 import threading
 import speech_recognition as sr
-import pyttsx3
+from gtts import gTTS
+import playsound
+import tempfile
 import google.generativeai as genai
 from dotenv import load_dotenv
 from dash.chatbot import Chatbot
@@ -21,9 +23,7 @@ OUTPUT_DEVICE_ID = int(os.getenv("OUTPUT_DEVICE_ID", 5))  # Default to device 5
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-exp-1206")
 
-# Global TTS engine initialization removed; now initialized asynchronously in main()
-tts_engine = pyttsx3.init()
-tts_engine.setProperty("voice", OUTPUT_DEVICE_ID)  # Set output device
+# Global TTS engine initialization removed; using gTTS in speak_response
 
 # Initialize STT recognizer
 recognizer = sr.Recognizer()
@@ -79,18 +79,25 @@ def chat_with_gemini(prompt):
         is_waiting_for_ai = False
         display_processing_icon(False)
 
-# Function to speak the AI response
+# Function to speak the AI response using gTTS and playsound
 def speak_response(text):
     global is_responding
 
     is_responding = True
     display_processing_icon(True)
 
-    tts_engine.say(text)
-    tts_engine.runAndWait()
-
-    is_responding = False
-    display_processing_icon(False)
+    try:
+        tts = gTTS(text=text, lang='en')
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
+            temp_path = fp.name
+        tts.save(temp_path)
+        playsound.playsound(temp_path)
+        os.remove(temp_path)
+    except Exception as e:
+        print(f"❌ Error during TTS: {e}")
+    finally:
+        is_responding = False
+        display_processing_icon(False)
 
 # Main loop
 async def main():
@@ -105,11 +112,9 @@ async def main():
         print("🤖 Initializing Chatbot...")
         await mybot.connect()
         print("🤖 Chatbot connected.")
-        
     except Exception as e:
         print(f"❌ Error initializing Chatbot: {e}")
         return
-    
 
     while True:
         if not (is_processing or is_waiting_for_ai or is_responding):
@@ -121,7 +126,7 @@ async def main():
             user_input = input("Type your message: ")
         else:
             user_input = listen_and_transcribe()
-    
+
         if user_input:
             if user_input == "exit" or user_input == "quit":
                 await mybot.disconnect()
@@ -130,7 +135,7 @@ async def main():
             else:
                 # Send to Gemini AI
                 ai_response = chat_with_gemini(system_prompt + " " + user_input)
-    
+
                 if ai_response:
                     print(f"🤖 AI said: {ai_response}")
                     
@@ -138,11 +143,11 @@ async def main():
                     
                     # Speak the response
                     speak_response(ai_response)
-    
-                is_processing = False
-                display_processing_icon(False)
-    
-                time.sleep(0.1)  # Small delay to avoid busy-waiting
+
+            is_processing = False
+            display_processing_icon(False)
+
+            time.sleep(0.1)  # Small delay to avoid busy-waiting
 
 if __name__ == "__main__":
     asyncio.run(main())

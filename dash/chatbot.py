@@ -31,7 +31,9 @@ class Chatbot:
         finally:            
             print("Completed connection process.")
 
-            # await self._robot.say("hi")  # Play a sound
+            await self._robot.say("hi")  # Play a sound
+            await self._robot.eye_brightness(50)  # Set eye brightness to 100
+            await self._robot.tail_brightness(50)  # Set tail brightness to 100
             await asyncio.sleep(1)            
 
     # @classmethod
@@ -60,9 +62,11 @@ class Chatbot:
             # Ensuring graceful disconnect            
             print("Saying goodbye...")
             await self._robot.say("bye")  # Play a sound
-            # await asyncio.sleep(1) 
+            await asyncio.sleep(1) 
             print("Resetting...")
             await self._robot.reset(4)  # Soft reset as a gentle cleanup
+            await self._robot.eye_brightness(50)  # Set eye brightness to 100
+            await self._robot.tail_brightness(50)  # Set tail brightness to 100            
             print("Disconnecting gracefully.")
             await self._robot.disconnect()
             print("Disconnected gracefully.")
@@ -75,7 +79,8 @@ class Chatbot:
         neck_color = random.choice(colors)
         ear_color = random.choice(colors)
         eye_pattern = random.randint(1, 4095)  # Random pattern for eye LEDs
-        tail_brightness = random.randint(150, 255)  # Random brightness for tail light
+        # tail_brightness = random.randint(150, 255)  # Random brightness for tail light
+        # tail_brightness=50
 
         # Set random colors and patterns for each light
         if hasattr(self._robot, 'neck_color'):
@@ -85,30 +90,36 @@ class Chatbot:
             await self._robot.right_ear_color(ear_color)
         if hasattr(self._robot, 'eye'):
             await self._robot.eye(eye_pattern)
-        if hasattr(self._robot, 'tail_brightness'):
-            await self._robot.tail_brightness(tail_brightness)
+            await self._robot.eye_brightness(50)
+            await self._robot.tail_brightness(50)
+        # if hasattr(self._robot, 'tail_brightness'):
+            # await self._robot.tail_brightness(tail_brightness)
 
         # await robot.move(100, 100)  # Move 100mm at 100mm/s
 
         # Randomly move the head back and forth (head nodding) synchronized with the lights
         # await asyncio.sleep(0.5)  # Delay for synchronized movement
-        # await robot.head_yaw(30)  # Turn head to one side
+        # await self._robot.head_yaw(30)  # Turn head to one side
         # await asyncio.sleep(0.5)  # Delay for synchronized movement
-        # await robot.head_yaw(-30)  # Turn head to the other side
+        # await self._robot.head_yaw(-30)  # Turn head to the other side
         # await asyncio.sleep(0.5)  # Delay for synchronized movement
-        # await robot.head_yaw(0)  # Return head to center position
+        # await self._robot.head_yaw(0)  # Return head to center position
 
-
+        await self._robot.head_pitch(10) 
+        await asyncio.sleep(0.5)  # Delay for synchronized movement
+        await self._robot.head_pitch(-30)  # Turn head to one side
+        await asyncio.sleep(0.5)  # Delay for synchronized movement
+        await self._robot.head_pitch(10)  # Return head to center position
 
         # await self.robot.spin(50)  # Gentle spin right
         # await asyncio.sleep(2)
 
         # print("Spinning left...")
-        # await self.robot.spin(-50)  # Gentle spin left
+        # await self._robot.spin(-50)  # Gentle spin left
         # await asyncio.sleep(2)
 
         # # await robot_instance.say("hi")  # Play a sound
-        # await self.robot.say("bragging")  # Play a sound
+        await self._robot.say("okay")  # Play a sound
         # # await robot_instance.say("
         # # ayayay")  # Play a sound
         # await asyncio.sleep(1)
