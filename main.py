@@ -9,6 +9,7 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 from dash.chatbot import Chatbot
 import asyncio
+import json
 
 # Load environment variables
 load_dotenv()
@@ -21,7 +22,8 @@ OUTPUT_DEVICE_ID = int(os.getenv("OUTPUT_DEVICE_ID", 5))  # Default to device 5
 
 # Initialize Google Gemini
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-exp-1206")
+# model = genai.GenerativeModel("gemini-exp-1206")
+model = genai.GenerativeModel("gemini-2.0-pro-exp-02-05")
 
 # Global TTS engine initialization removed; using gTTS in speak_response
 
@@ -104,7 +106,9 @@ async def main():
     global is_processing, is_waiting_for_ai, is_responding
 
     # Initial system prompt
-    system_prompt = "The system acts like a friendly young girl who knows lots of stuff and is always willing to chat with the user. It should just reply up to three sentences and most of the time in one or two sentences."
+    system_prompt = "You are a clever and friendly bot called Dash. You reply up to one or two sentences."
+    
+    #  Always reply in JSON : {'message': 'example message','emotion':'example emotion'}. 'Message' is plain reply without emoji, 'emotion' for emotion code. The emotion code can only be one of the followings: 'dance' for joyful, excited or satisfied feelings; 'idontknow' for dissatisfied, disappointed or angry; 'no' for surprised or shocked; 'idle' for a neutral emotional state.  Ensure your reply is engaging and fits the character's personality to this user message: "
 
     print("🤖 Chatbot is starting...")
     try:
@@ -112,6 +116,7 @@ async def main():
         print("🤖 Initializing Chatbot...")
         await mybot.connect()
         print("🤖 Chatbot connected.")
+        # print("AI initialization status: {0}", chat_with_gemini(system_prompt))
     except Exception as e:
         print(f"❌ Error initializing Chatbot: {e}")
         return
@@ -128,16 +133,21 @@ async def main():
             user_input = listen_and_transcribe()
 
         if user_input:
-            if user_input == "exit" or user_input == "quit":
+            if user_input == "bye" or user_input == "quit":
                 await mybot.disconnect()
                 print("👋 Goodbye!")
                 break
             else:
                 # Send to Gemini AI
-                ai_response = chat_with_gemini(system_prompt + " " + user_input)
+                # ai_response = chat_with_gemini(system_prompt + " " + user_input)
+                # ai_response = json.loads(chat_with_gemini(system_prompt + user_input))
+                ai_response = chat_with_gemini(system_prompt + user_input)
+                # feedback = json.loads(ai_response)
+                # print(f"🤖 AI message: {feedback['message']}/🤖 AI emotion: {feedback['emotion']}")
 
                 if ai_response:
-                    print(f"🤖 AI said: {ai_response}")
+                    print(f"🤖 AI message: {ai_response}")
+                    # print(f"🤖 AI emotion: {ai_response['emotion']}/🤖 AI message: {ai_response['message']}")
                     
                     await mybot.say_action()
                     

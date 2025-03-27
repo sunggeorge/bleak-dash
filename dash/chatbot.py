@@ -76,6 +76,9 @@ class Chatbot:
         print("Doing say function...")
 
         colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFFFFF', '#FFA500', '#FF1493', '#8A2BE2', '#00CED1', '#32CD32', '#FFD700', '#FF4500']
+        say = ['okay', 'ayayay', 'confused2', 'tada', 'lion', 'bragging']
+        
+        say_string = random.choice(say)
         neck_color = random.choice(colors)
         ear_color = random.choice(colors)
         eye_pattern = random.randint(1, 4095)  # Random pattern for eye LEDs
@@ -119,7 +122,7 @@ class Chatbot:
         # await asyncio.sleep(2)
 
         # # await robot_instance.say("hi")  # Play a sound
-        await self._robot.say("okay")  # Play a sound
+        await self._robot.say(say_string)  # Play a sound
         # # await robot_instance.say("
         # # ayayay")  # Play a sound
         # await asyncio.sleep(1)
