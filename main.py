@@ -11,8 +11,10 @@ from dash.chatbot import Chatbot
 import asyncio
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)  # Force reload with override=True
 INPUT_MODE = os.getenv("INPUT_MODE", "voice")  # Default to voice input
+# Convert string "True"/"False" to boolean True/False
+CONNECT_DASH = os.getenv("CONNECT_DASH", "False").lower() == "true"
 
 # Configuration
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -23,8 +25,6 @@ OUTPUT_DEVICE_ID = int(os.getenv("OUTPUT_DEVICE_ID", 5))  # Default to device 5
 # Initialize Google Gemini
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel(GEMINI_MODEL)
-
-# Global TTS engine initialization removed; using gTTS in speak_response
 
 # Initialize STT recognizer
 recognizer = sr.Recognizer()
@@ -53,7 +53,7 @@ def listen_and_transcribe():
 
     try:
         print("🔍 Transcribing...")
-        text = recognizer.recognize_sphinx(audio)  # Use Google Web Speech API
+        text = recognizer.recognize_sphinx(audio)
         print(f"👤 User said: {text}")
         return text
     except sr.UnknownValueError:
@@ -107,17 +107,18 @@ async def main():
     # Initial system prompt
     system_prompt = "You are a clever and friendly bot called Dash. You reply up to one or two sentences."
     
-    print("🤖 Chatbot is starting...")
-    try:
-        MAC_ADDRESS = os.getenv("MAC_ADDRESS")
-        mybot = Chatbot(MAC_ADDRESS)
-        print("🤖 Initializing Chatbot...")
-        await mybot.connect()
-        print("🤖 Chatbot connected.")
-        # print("AI initialization status: {0}", chat_with_gemini(system_prompt))
-    except Exception as e:
-        print(f"❌ Error initializing Chatbot: {e}")
-        return
+    if CONNECT_DASH:
+        print("🤖 Chatbot is starting...")
+        try:
+            MAC_ADDRESS = os.getenv("MAC_ADDRESS")
+            mybot = Chatbot(MAC_ADDRESS)
+            print("🤖 Initializing Chatbot...")
+            await mybot.connect()
+            print("🤖 Chatbot connected.")
+            # print("AI initialization status: {0}", chat_with_gemini(system_prompt))
+        except Exception as e:
+            print(f"❌ Error initializing Chatbot: {e}")
+            return
 
     while True:
         if not (is_processing or is_waiting_for_ai or is_responding):
@@ -132,7 +133,8 @@ async def main():
 
         if user_input:
             if user_input == "bye" or user_input == "quit":
-                await mybot.disconnect()
+                if CONNECT_DASH:
+                    await mybot.disconnect()
                 print("👋 Goodbye!")
                 break
             else:
@@ -142,7 +144,8 @@ async def main():
                 if ai_response:
                     print(f"🤖 AI message: {ai_response}")
                     
-                    await mybot.say_action()
+                    if CONNECT_DASH:
+                        await mybot.say_action()
                     
                     # Speak the response
                     speak_response(ai_response)
