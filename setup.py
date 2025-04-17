@@ -2,10 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     name='bleak-dash',
-    version='0.1.0',
+    version='0.2.0',  # Increment version for your significant additions
     author='Alex Klein',
     author_email='alexanderjamesklein@gmail.com',
-    description='An unofficial bleak powered library for controlling Wonder Workshop\'s Dash robot.',
+    description='An unofficial bleak powered library for controlling Wonder Workshop\'s Dash robot with added AI chatbot capabilities.',
     long_description="""
 # bleak-dash
 
@@ -18,8 +18,13 @@ Adapted from original source code Copyright 2016 Ilya Sukhanov (https://github.c
 - Cross Platform
 - Asynchronous
 
+## New Features
+- AI chatbot integration using Google's Gemini models
+- Voice recognition and text-to-speech capabilities
+- Interactive robot movements synchronized with AI responses
+
 ## Motivation
-Designed for use with Dash robot from various operating systems without reinventing the wheel.
+Designed for use with Dash robot from various operating systems without reinventing the wheel, now with added AI conversation capabilities.
 
 ## Compatibility
 Thanks to Bleak, the library is Windows, Mac, and Linux agnostic. Tested on M1 & Windows.
@@ -30,6 +35,12 @@ Thanks to Bleak, the library is Windows, Mac, and Linux agnostic. Tested on M1 &
     install_requires=[
         'bleak==0.21.1',
         'colour==0.1.5',
+        'google-generativeai>=0.3.2',
+        'SpeechRecognition>=3.10.0',
+        'gTTS>=2.5.4',
+        'playsound>=1.2.2',
+        'python-dotenv>=1.0.0',
+        'PyAudio>=0.2.14',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -39,6 +50,8 @@ Thanks to Bleak, the library is Windows, Mac, and Linux agnostic. Tested on M1 &
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.11',
         'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence',
     ],
-    keywords='bleak dash robot wonder workshop asynchronous',
+    keywords='bleak dash robot wonder workshop asynchronous ai chatbot gemini speech',
+    python_requires='>=3.9',
 )
